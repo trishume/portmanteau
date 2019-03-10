@@ -11,3 +11,8 @@ It's a Rust program that hosts a web app. The searching is done on the backend u
 ## Why though
 
 Made for TerribleHack XIII, the premier terrible ideas hackathon in Waterloo.
+
+## Screenshots
+
+![example](screenshots/example.png)
+![homepage](screenshots/homepage.png)
