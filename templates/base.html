@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{% block title %}Portmanteau generator{% endblock title %}</title>
+    <style type="text/css">
+        body{margin:40px auto;max-width:650px;line-height:1.6;font-size:18px;color:#444;padding:0 10px}
+        h1,h2,h3{line-height:1.2}
+        #end-field {padding-left: 20px;}
+        #byline {margin-top: 2px; margin-bottom: 10px;}
+        #title {margin-bottom: 2px;}
+    </style>
+    {% block head %}
+    {% endblock head %}
+</head>
+<body>
+    <h1 id="title">Portmanteau Generator</h1>
+    <h4 id="byline">By <a href="http://thume.ca/">Tristan Hume</a></h4>
+    <form>
+        <span id="start-field">
+        <label for="start">Start:</label>
+        <input type="text" name="start" value="{% block start %}{% endblock start %}" />
+        </span>
+        <span id="end-field">
+        <label for="end">End:</label>
+        <input type="text" name="end" value="{% block end %}{% endblock end %}" />
+        </span>
+        <input type="submit">
+    </form>
+    <div id="content">{% block content %}{% endblock content %}</div>
+</body>
+</html>

@@ -2,7 +2,7 @@ use std::fs::File;
 use std::io;
 use std::io::BufRead;
 use std::io::BufReader;
-use crate::search::{SearchError, Path, Searcher};
+use crate::search::Searcher;
 use crate::data::PrefixBase;
 
 pub mod data;
