@@ -5,11 +5,15 @@
     Find a portmanteau between two words using a graph search that finds words to link between them!
   </p>
   <p>
+    It favours larger overlaps between words, and tries first with common words and falls back to uncommon ones, for only the highest quality portmanteaus.
+  </p>
+  <p>
     Made for <a href="http://terriblehack.website">TerribleHack XIII</a>, the premier terrible ideas hackathon in Waterloo.
   </p>
   <h2>Examples</h2>
   <ul>
     <li><a href="/?start=terriblehack&end=portmanteau">terriblehack and portmanteau</a></li>
     <li><a href="/?start=magical&end=walrus">magical and walrus</a></li>
+    <li><a href="/?start=portmanteau&end=generator">portmanteau and generator</a></li>
   </ul>
 {% endblock content %}

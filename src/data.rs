@@ -4,8 +4,8 @@ pub struct PrefixBase {
     data: HashMap<String, Vec<usize>>,
 }
 
-static MIN_PREFIX : usize = 2;
-static MAX_PREFIX : usize = 5;
+pub static MIN_PREFIX : usize = 2;
+pub static MAX_PREFIX : usize = 6;
 
 impl PrefixBase {
     pub fn new(words: &[String]) -> Self {
@@ -22,7 +22,7 @@ impl PrefixBase {
         PrefixBase { data }
     }
 
-    pub fn successors(&self, s: &str, mut f: impl FnMut(usize)) {
+    pub fn successors(&self, s: &str, mut f: impl FnMut(usize, usize)) {
         for len in MIN_PREFIX..MAX_PREFIX {
             let s_len = s.len();
             if len > s_len {
@@ -30,7 +30,7 @@ impl PrefixBase {
             }
             if let Some(words) = self.data.get(&s[s_len-len..]) {
                 for w in words.iter().cloned() {
-                    f(w)
+                    f(w, len)
                 }
             }
         }

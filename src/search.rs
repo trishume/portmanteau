@@ -1,6 +1,7 @@
-use crate::data::{PrefixBase, has_overlap};
-use std::collections::{VecDeque, HashMap};
-use std::collections::hash_map::Entry;
+use crate::data::{PrefixBase, has_overlap, MAX_PREFIX};
+use std::collections::{HashMap, BinaryHeap};
+use std::cmp::Ordering;
+use std::usize;
 
 #[derive(Debug)]
 pub enum SearchError {
@@ -62,39 +63,59 @@ impl Path {
     }
 }
 
+#[derive(PartialEq, Eq)]
+struct InvertOrder(usize);
+
+impl PartialOrd for InvertOrder {
+    fn partial_cmp(&self, other: &InvertOrder) -> Option<Ordering> {
+        Some(other.0.cmp(&self.0))
+    }
+}
+
+impl Ord for InvertOrder {
+    fn cmp(&self, other: &InvertOrder) -> Ordering {
+        other.0.cmp(&self.0)
+    }
+}
+
 pub struct Searcher<'a> {
     prefixes: &'a PrefixBase,
     words: &'a [String],
 
-    q: VecDeque<usize>,
+    q: BinaryHeap<(InvertOrder, usize)>,
     preds: HashMap<usize, Option<usize>>,
+    dists: Vec<usize>,
 }
 
 impl<'a> Searcher<'a> {
     pub fn new(prefixes: &'a PrefixBase, words: &'a [String]) -> Self {
         Searcher {
-            prefixes, words,
-            q: VecDeque::new(),
+            q: BinaryHeap::new(),
             preds: HashMap::new(),
+            dists: (0..words.len()).map(|_| usize::MAX).collect(),
+            prefixes, words,
         }
     }
 
     pub fn search(&mut self, start: &str, target: &str) -> Result<Path,SearchError> {
-        self.push_succs(start, None);
+        self.push_succs(start, 0, None);
 
         let final_i = loop {
-            let i = if let Some(i) = self.q.pop_front() {
-                i
+            let (InvertOrder(d),i) = if let Some((d,i)) = self.q.pop() {
+                (d,i)
             } else {
                 return Err(SearchError::NoPath)
             };
+
+            // we may have found a better way here earlier
+            if d > self.dists[i] { continue; }
 
             let word = &self.words[i];
             if has_overlap(word, target) {
                 break i;
             }
 
-            self.push_succs(word, Some(i));
+            self.push_succs(word, d, Some(i));
         };
 
         let mut path = vec![target.to_string()];
@@ -113,11 +134,20 @@ impl<'a> Searcher<'a> {
         Ok(Path {words: path})
     }
 
-    fn push_succs(&mut self, s: &str, i: Option<usize>) {
-        self.prefixes.successors(s, |wi| {
-            if let Entry::Vacant(v) = self.preds.entry(wi) {
-                v.insert(i);
-                self.q.push_back(wi);
+    fn push_succs(&mut self, s: &str, base_dist: usize, i: Option<usize>) {
+        self.prefixes.successors(s, |wi, len| {
+            // let weight = 1 + MAX_PREFIX - len;
+            let weight = match len {
+                1 => 100,
+                2 => 10,
+                3 => 2,
+                _ => 1
+            };
+            let next_dist = base_dist + weight;
+            if next_dist < self.dists[wi] {
+                self.dists[wi] = next_dist;
+                self.preds.insert(wi, i);
+                self.q.push((InvertOrder(next_dist), wi));
             }
         });
     }
