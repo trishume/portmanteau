@@ -1,22 +1,26 @@
-use portmanteau::load_word_list;
-use portmanteau::data::PrefixBase;
+use portmanteau::ListData;
 
 // use std::collections::HashSet;
 
 fn main() {
-    let words = load_word_list().unwrap();
-    println!("{:#?}", &words[0..100]);
+    let args: Vec<String> = std::env::args().collect();
+    if args.len() < 3 {
+        eprintln!("Usage: portmanteau START END");
+        return;
+    }
 
-    // let mut prefixes = HashSet::new();
-    // for w in &words {
-    //     prefixes.insert(w[..w.len().min(5)].to_string());
-    // }
-    // dbg!(prefixes.len());
+    let small = ListData::load_and_index("data/google-10000-english-usa-no-swears.txt").unwrap();
+    let large = ListData::load_and_index("data/wordlist.asc.txt").unwrap();
 
-    let prefixes = PrefixBase::new(&words);
-    prefixes.successors("prefix", |ws| {
-        for w in ws {
-            println!("{}", w);
+    let (a,b) = (&args[1], &args[2]);
+    let res = small.searcher().search(a,b).or_else(|_| {
+        large.searcher().search(a, b)
+    });
+    match res {
+        Ok(path) => {
+            eprintln!("Path found:\n");
+            println!("{}", path.fancy_ouput())
         }
-    })
+        Err(_) => println!("Path not found!  :("),
+    }
 }
